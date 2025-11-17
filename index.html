@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Biblioteca</title>
+    <link  rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Pantalla de Login -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-form">
+                <h1>Sistema de Gestión de Biblioteca</h1>
+                <div id="loginAlert"></div>
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="loginUsername" placeholder="Ingrese su usuario">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Ingrese su contraseña">
+                </div>
+                <button onclick="login()" style="width: 100%;">Iniciar Sesión</button>
+                <div style="margin-top: 20px; font-size: 13px; color: #7f8c8d;">
+                    <p><strong>Usuarios de prueba:</strong></p>
+                    <p>Estudiante: estudiante1 / pass123</p>
+                    <p>Profesor: profesor1 / pass123</p>
+                    <p>Administrador: admin / admin123</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de Búsqueda y Reservas (Estudiante/Profesor) -->
+        <div id="userScreen" class="screen">
+            <div class="header">
+                <h1>Búsqueda de Libros</h1>
+                <div>
+                    <span class="user-info" id="currentUser"></span>
+                    <button class="secondary" onclick="logout()" style="margin-left: 15px;">Cerrar Sesión</button>
+                </div>
+            </div>
+
+            <div id="userAlert"></div>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Buscar por título, autor o categoría...">
+                <select id="categoryFilter">
+                    <option value="">Todas las categorías</option>
+                    <option value="Ficción">Ficción</option>
+                    <option value="Ciencia">Ciencia</option>
+                    <option value="Historia">Historia</option>
+                    <option value="Tecnología">Tecnología</option>
+                    <option value="Arte">Arte</option>
+                </select>
+                <button onclick="searchBooks()">Buscar</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchUserTab('available')">Libros Disponibles</button>
+                <button class="tab" onclick="switchUserTab('myReservations')">Mis Reservas</button>
+            </div>
+
+            <div id="availableTab" class="tab-content active">
+                <div id="booksGrid" class="books-grid"></div>
+            </div>
+
+            <div id="myReservationsTab" class="tab-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Libro</th>
+                            <th>Fecha de Reserva</th>
+                            <th>Fecha de Recogida</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myReservationsTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pantalla de Administración -->
+        <div id="adminScreen" class="screen">
+            <div class="header">
+                <h1>Panel de Administración</h1>
+                <div>
+                    <span class="user-info" id="adminUser"></span>
+                    <button class="secondary" onclick="logout()" style="margin-left: 15px;">Cerrar Sesión</button>
+                </div>
+            </div>
+
+            <div id="adminAlert"></div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchAdminTab('books')">Gestión de Libros</button>
+                <button class="tab" onclick="switchAdminTab('reservations')">Gestión de Reservas</button>
+                <button class="tab" onclick="switchAdminTab('reports')">Reportes</button>
+            </div>
+
+            <div id="booksTab" class="tab-content active">
+                <button onclick="showAddBookModal()" style="margin-bottom: 20px;">Agregar Nuevo Libro</button>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Autor</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminBooksTable"></tbody>
+                </table>
+            </div>
+
+            <div id="reservationsTab" class="tab-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Tipo</th>
+                            <th>Libro</th>
+                            <th>Fecha de Recogida</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminReservationsTable"></tbody>
+                </table>
+            </div>
+
+            <div id="reportsTab" class="tab-content">
+                <h2>Estadísticas del Sistema</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalBooks">0</div>
+                        <div class="stat-label">Total de Libros</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="availableBooks">0</div>
+                        <div class="stat-label">Libros Disponibles</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalReservations">0</div>
+                        <div class="stat-label">Total de Reservas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="pendingReservations">0</div>
+                        <div class="stat-label">Reservas Pendientes</div>
+                    </div>
+                </div>
+
+                <h3>Libros por Categoría</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Cantidad</th>
+                            <th>Disponibles</th>
+                            <th>Reservados</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoryReportTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Agregar/Editar Libro -->
+    <div id="bookModal" class="modal">
+        <div class="modal-content">
+            <h2 id="bookModalTitle">Agregar Nuevo Libro</h2>
+            <div class="form-group">
+                <label>Título</label>
+                <input type="text" id="bookTitle">
+            </div>
+            <div class="form-group">
+                <label>Autor</label>
+                <input type="text" id="bookAuthor">
+            </div>
+            <div class="form-group">
+                <label>Categoría</label>
+                <select id="bookCategory">
+                    <option value="Ficción">Ficción</option>
+                    <option value="Ciencia">Ciencia</option>
+                    <option value="Historia">Historia</option>
+                    <option value="Tecnología">Tecnología</option>
+                    <option value="Arte">Arte</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="secondary" onclick="closeBookModal()">Cancelar</button>
+                <button onclick="saveBook()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Reservar Libro -->
+    <div id="reserveModal" class="modal">
+        <div class="modal-content">
+            <h2>Reservar Libro</h2>
+            <p id="reserveBookInfo"></p>
+            <div class="form-group">
+                <label>Fecha de Recogida</label>
+                <input type="date" id="pickupDate">
+            </div>
+            <div class="modal-actions">
+                <button class="secondary" onclick="closeReserveModal()">Cancelar</button>
+                <button onclick="confirmReservation()">Confirmar Reserva</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
